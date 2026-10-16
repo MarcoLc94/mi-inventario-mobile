@@ -248,16 +248,22 @@ class _KpiGrid extends StatelessWidget {
   const _KpiGrid({required this.children});
   final List<Widget> children;
 
+  /// Dos por fila y del alto de su contenido (con letra grande, una
+  /// proporción fija dejaba tarjetas enormes o cortadas).
   @override
-  Widget build(BuildContext context) => GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.25,
-        children: children,
-      );
+  Widget build(BuildContext context) => Column(children: [
+        for (var i = 0; i < children.length; i += 2)
+          Padding(
+            padding: EdgeInsets.only(bottom: i + 2 < children.length ? 12 : 0),
+            child: IntrinsicHeight(
+              child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Expanded(child: children[i]),
+                const SizedBox(width: 12),
+                Expanded(child: i + 1 < children.length ? children[i + 1] : const SizedBox.shrink()),
+              ]),
+            ),
+          ),
+      ]);
 }
 
 class _Kpi extends StatelessWidget {
@@ -284,6 +290,7 @@ class _Kpi extends StatelessWidget {
               Expanded(child: Text(label, style: theme.textTheme.bodySmall, maxLines: 2)),
               Icon(icon, size: 20, color: color),
             ]),
+            const SizedBox(height: 10),
             const Spacer(),
             FittedBox(
               fit: BoxFit.scaleDown,

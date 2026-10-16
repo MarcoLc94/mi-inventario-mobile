@@ -199,7 +199,8 @@ class _Bubble extends StatelessWidget {
             Expanded(
               child: OutlinedButton(
                 onPressed: guide.busy ? null : (help ? () => _basicTutorial(context) : guide.skip),
-                child: Text(help ? 'Ver tutorial básico' : 'Saltar tutorial'),
+                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 10)),
+                child: FittedBox(fit: BoxFit.scaleDown, child: Text(help ? 'Ver tutorial básico' : 'Saltar tutorial', maxLines: 1)),
               ),
             ),
             const SizedBox(width: 8),
@@ -213,11 +214,15 @@ class _Bubble extends StatelessWidget {
                             context.go('/help/boxy');
                           }
                         : () => _continue(context),
-                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Flexible(child: Text(help ? 'Hablar con Boxy' : (guide.busy ? 'Comprobando…' : (guide.isLast && guide.onStepScreen ? 'Terminar' : 'Continuar')), overflow: TextOverflow.ellipsis)),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.arrow_forward, size: 17),
-                ]),
+                style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 10)),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Text(help ? 'Hablar con Boxy' : (guide.busy ? 'Comprobando…' : (guide.isLast && guide.onStepScreen ? 'Terminar' : 'Continuar')), maxLines: 1),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_forward, size: 17),
+                  ]),
+                ),
               ),
             ),
           ]),

@@ -671,7 +671,11 @@ class _PosCartScreenState extends State<PosCartScreen> {
         Text('Forma de pago', style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         SegmentedButton<String>(
-          segments: [for (final e in posMethods.entries) ButtonSegment(value: e.key, label: Text(e.value))],
+          showSelectedIcon: false,
+          segments: [
+            for (final e in posMethods.entries)
+              ButtonSegment(value: e.key, label: FittedBox(fit: BoxFit.scaleDown, child: Text(e.value, maxLines: 1, softWrap: false))),
+          ],
           selected: {_method},
           onSelectionChanged: locked ? null : (v) => setState(() => _method = v.first),
         ),
