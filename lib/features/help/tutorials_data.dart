@@ -1,11 +1,14 @@
 /// Recorridos de Boxy (mismo texto que la web: components/inventoryGuide).
 class TutorialStep {
-  const TutorialStep(this.title, this.text, [this.path]);
+  const TutorialStep(this.title, this.text, [this.path, this.requirement]);
   final String title;
   final String text;
 
   /// Pantalla donde se hace el paso (misma ruta que la web).
   final String? path;
+
+  /// Clave de GET /inventory_tutorial que debe estar cumplida para avanzar.
+  final String? requirement;
 }
 
 class Tutorial {
@@ -23,12 +26,12 @@ const tutorials = [
     description: 'Almacenes, productos, entradas, salidas y comprobantes.',
     steps: [
       TutorialStep('¡Hola! Soy tu compañero de inventario.', 'Te acompañaré en tus primeros pasos. Vamos a preparar tu almacén, mover tus primeros productos y descargar un comprobante. ¿Empezamos?'),
-      TutorialStep('Primero, un lugar para tus productos.', 'Aquí están tus almacenes. Crea uno con nombre y ubicación, o usa el que ya tienes activo. Cuando esté listo, pulsa Continuar.', '/warehouses'),
-      TutorialStep('Conozcamos tu primer producto.', 'Pulsa Nuevo producto y completa sus datos. Puedes dejar el stock inicial en cero: lo registraremos juntos en el siguiente paso.', '/products'),
-      TutorialStep('¡Vamos a registrar una entrada!', 'Elige almacén y producto, escribe una cantidad y el motivo, y confirma la entrada. Estos datos se guardan en tu cuenta y sí cambian tus existencias.', '/inventory/manual?type=IN'),
+      TutorialStep('Primero, un lugar para tus productos.', 'Aquí están tus almacenes. Crea uno con nombre y ubicación, o usa el que ya tienes activo. Cuando esté listo, pulsa Continuar.', '/warehouses', 'warehouse'),
+      TutorialStep('Conozcamos tu primer producto.', 'Pulsa Nuevo producto y completa sus datos. Puedes dejar el stock inicial en cero: lo registraremos juntos en el siguiente paso.', '/products', 'product'),
+      TutorialStep('¡Vamos a registrar una entrada!', 'Elige almacén y producto, escribe una cantidad y el motivo, y confirma la entrada. Estos datos se guardan en tu cuenta y sí cambian tus existencias.', '/inventory/manual?type=IN', 'entry'),
       TutorialStep('Mira cómo creció tu inventario.', 'Aquí puedes consultar el stock de tus productos. El círculo señala las existencias actuales. Revisa el producto de tu entrada y después continuemos con una salida.', '/products'),
-      TutorialStep('Ahora registremos una salida.', 'Usa el mismo almacén y producto. Captura una cantidad disponible, indica el motivo y confirma. Las unidades reservadas no se pueden retirar.', '/inventory/manual?type=OUT'),
-      TutorialStep('Cada movimiento tiene su comprobante.', 'En Comprobantes, pulsa PDF en una entrada o salida. Es un documento de control interno: no necesitas activar Facturación.', '/inventory/receipts'),
+      TutorialStep('Ahora registremos una salida.', 'Usa el mismo almacén y producto. Captura una cantidad disponible, indica el motivo y confirma. Las unidades reservadas no se pueden retirar.', '/inventory/manual?type=OUT', 'exit'),
+      TutorialStep('Cada movimiento tiene su comprobante.', 'En Comprobantes, pulsa PDF en una entrada o salida. Es un documento de control interno: no necesitas activar Facturación.', '/inventory/receipts', 'receipt'),
       TutorialStep('¡Ya estás listo para empezar!', 'Ya conoces el recorrido básico. También puedes explorar Compras y Ventas; la facturación electrónica es un módulo adicional. Si me necesitas, puedes volver a abrir esta guía.'),
     ],
   ),
@@ -46,3 +49,14 @@ const tutorials = [
     ],
   ),
 ];
+
+Tutorial? tutorialById(String id) => tutorials.where((t) => t.id == id).firstOrNull;
+
+/// Tutorial de la pantalla (tutorialForPath en la web).
+String? tutorialForPath(String path) {
+  if (RegExp(r'^/pos(?:/|$)').hasMatch(path)) return 'pos';
+  if (RegExp(r'^/(products|categories|warehouses|inventory|inventory-adjustments|transfers|stock-history)(?:/|$)').hasMatch(path)) {
+    return 'inventory';
+  }
+  return null;
+}

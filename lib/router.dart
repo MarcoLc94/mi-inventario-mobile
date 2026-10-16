@@ -159,7 +159,7 @@ GoRouter buildRouter(SessionController session) {
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/lock', builder: (_, _) => const LockScreen()),
       ShellRoute(
-        builder: (_, _, child) => AppShell(child: child),
+        builder: (_, state, child) => AppShell(location: state.uri, child: child),
         routes: [
           for (final entry in implemented.entries)
             GoRoute(path: entry.key, pageBuilder: (_, state) => NoTransitionPage(child: entry.value(state))),

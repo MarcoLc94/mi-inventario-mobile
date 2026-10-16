@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'core/api_client.dart';
+import 'core/boxy_guide.dart';
 import 'core/catalogs.dart';
 import 'core/session.dart';
 import 'core/theme.dart';
@@ -38,6 +39,13 @@ class MiInventarioApp extends StatefulWidget {
 
 class _MiInventarioAppState extends State<MiInventarioApp> {
   late final GoRouter _router = buildRouter(widget.session);
+  late final BoxyGuide _boxy = BoxyGuide(widget.api, widget.session);
+
+  @override
+  void dispose() {
+    _boxy.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => MultiProvider(
@@ -46,13 +54,14 @@ class _MiInventarioAppState extends State<MiInventarioApp> {
           Provider.value(value: widget.catalogs),
           ChangeNotifierProvider.value(value: widget.session),
           ChangeNotifierProvider.value(value: widget.themeController),
+          ChangeNotifierProvider.value(value: _boxy),
         ],
         child: Consumer<ThemeController>(
           builder: (context, theme, _) => MaterialApp.router(
             title: 'Mi Inventario',
             debugShowCheckedModeBanner: false,
-            theme: buildTheme(Brightness.light),
-            darkTheme: buildTheme(Brightness.dark),
+            theme: buildTheme(Brightness.light, theme.primary),
+            darkTheme: buildTheme(Brightness.dark, theme.primary),
             themeMode: theme.mode,
             locale: const Locale('es', 'MX'),
             supportedLocales: const [Locale('es', 'MX'), Locale('es')],

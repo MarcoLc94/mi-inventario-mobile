@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/boxy_guide.dart';
 import '../../core/formatters.dart';
 import '../../core/session.dart';
 import '../../core/theme.dart';
@@ -128,7 +129,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onSelectionChanged: (value) => themeController.setMode(value.first),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Wrap(spacing: 10, runSpacing: 10, children: [
+                  for (final (name, color) in accentPalettes)
+                    Tooltip(
+                      message: name,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () => themeController.setPrimary(color),
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: theme.colorScheme.outlineVariant, width: 2),
+                          ),
+                          child: themeController.primary.toARGB32() == color.toARGB32()
+                              ? const Icon(Icons.check, color: Colors.white, size: 20)
+                              : null,
+                        ),
+                      ),
+                    ),
+                ]),
+              ),
             ]),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: SwitchListTile(
+              secondary: const Icon(Icons.support_agent),
+              title: const Text('Mostrar a Boxy'),
+              subtitle: const Text('Tu guía con tutoriales en cada módulo. También lo abres con su botón en la barra superior.'),
+              value: context.watch<BoxyGuide>().visible,
+              onChanged: (value) => context.read<BoxyGuide>().setVisible(value),
+            ),
           ),
           const SizedBox(height: 12),
           Card(
