@@ -18,6 +18,9 @@ import 'features/lots/lots_screen.dart';
 import 'features/manual_inventory/manual_inventory_screen.dart';
 import 'features/manual_inventory/receipts_screen.dart';
 import 'features/placeholder/module_placeholder.dart';
+import 'features/pos/pos_screen.dart';
+import 'features/pos/pos_sessions_screen.dart';
+import 'features/pos/pos_tickets_screen.dart';
 import 'features/products/product_detail_screen.dart';
 import 'features/products/products_screen.dart';
 import 'features/purchases/purchase_order_detail_screen.dart';
@@ -58,6 +61,9 @@ GoRouter buildRouter(SessionController session) {
     '/clients': (_) => const ClientsScreen(),
     '/clients/orders': (_) => const SaleOrdersScreen(),
     '/clients/returns': (_) => const ReturnsScreen(kind: ReturnKind.client),
+    '/pos': (_) => const PosScreen(),
+    '/pos/tickets': (_) => const PosTicketsScreen(),
+    '/pos/cortes': (_) => const PosSessionsScreen(),
   };
 
   // Pantallas de detalle o formulario (se apilan sobre la lista, con botón atrás).
