@@ -15,10 +15,12 @@ void main() {
     final r = pixel.r.toInt(), g = pixel.g.toInt(), b = pixel.b.toInt();
     final gray = (r - g).abs() < 28 && (g - b).abs() < 28;
     final corner = pixel.x >= 470 && pixel.y >= 300;
-    if (gray && ((corner && r > 40) || r < 60)) pixel
-      ..r = 12
-      ..g = 12
-      ..b = 14;
+    if (gray && ((corner && r > 40) || r < 60)) {
+      pixel
+        ..r = 12
+        ..g = 12
+        ..b = 14;
+    }
   }
   final icon = img.copyResize(crop, width: 1024, height: 1024, interpolation: img.Interpolation.cubic);
   File('assets/images/app_icon.png').writeAsBytesSync(img.encodePng(icon));

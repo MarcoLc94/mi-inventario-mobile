@@ -19,7 +19,7 @@ const _statusLabels = {
   'suspended': 'Suspendida',
   'cancelled': 'Cancelada',
 };
-const _planLabels = {'trial': 'Prueba gratuita', 'monthly': 'Plan mensual', 'annual': 'Plan anual'};
+const _planLabels = {'free': 'Plan gratuito', 'trial': 'Prueba gratuita', 'monthly': 'Plan mensual', 'annual': 'Plan anual'};
 
 /// Plan y suscripción. En la app el cobro es solo con Google Play Billing; no
 /// se muestran precios ni enlaces de pago externos (políticas de Play).
@@ -125,6 +125,9 @@ class _BillingScreenState extends State<BillingScreen> {
                 if (status == 'trial' && trialEnds != null) Text('La prueba termina el ${formatDate(b['trial_ends_at'])}.'),
                 if (paidPlan && b['current_period_end'] != null)
                   Text('${status == 'past_due' ? 'Pago pendiente. ' : ''}Periodo actual hasta el ${formatDate(b['current_period_end'])}.'),
+                if (b['plan'] == 'free')
+                  const Text('Incluye Inventario para 1 usuario, 1 almacén y hasta 50 productos. '
+                      'Suscríbete para quitar los límites y activar Compras, Ventas y Punto de venta.'),
                 if (paidWithPlay) const Text('Se cobra con Google Play.'),
                 if (paidWithStripe) const Text('Tu suscripción ya está activa y se administra desde tu cuenta en la web.'),
               ]),

@@ -109,7 +109,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           child: ListTile(
             leading: const Icon(Icons.workspace_premium_outlined),
             title: const Text('Plan y suscripción'),
-            subtitle: Text(a['status']?.toString() == 'active' ? 'Activa' : a['status']?.toString() ?? ''),
+            subtitle: Text(_billing?['plan'] == 'free'
+                ? 'Plan gratuito'
+                : a['status']?.toString() == 'active'
+                    ? 'Activa'
+                    : a['status']?.toString() ?? ''),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/billing'),
           ),
