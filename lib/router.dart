@@ -9,6 +9,7 @@ import 'features/adjustments/new_adjustment_screen.dart';
 import 'features/auth/lock_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/splash_screen.dart';
+import 'features/billing/billing_screen.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/cfdis/cfdi_catalogs.dart';
 import 'features/cfdis/cfdi_document_detail_screen.dart';
@@ -56,6 +57,7 @@ GoRouter buildRouter(SessionController session) {
     '/': (_) => const HomeScreen(),
     '/products': (state) => ProductsScreen(initialFilter: state.uri.queryParameters['filter']),
     '/settings': (_) => const SettingsScreen(),
+    '/billing': (_) => const BillingScreen(),
     '/categories': (_) => const CategoriesScreen(),
     '/inventory-adjustments': (_) => const AdjustmentsScreen(),
     '/transfers': (_) => const TransfersScreen(),
@@ -137,11 +139,8 @@ GoRouter buildRouter(SessionController session) {
           for (final entry in implemented.entries)
             GoRoute(path: entry.key, pageBuilder: (_, state) => NoTransitionPage(child: entry.value(state))),
           for (final entry in details.entries) GoRoute(path: entry.key, builder: (_, state) => entry.value(state)),
-          GoRoute(
-            path: '/account-settings',
-            pageBuilder: (_, state) => NoTransitionPage(
-                child: ModulePlaceholder(title: 'Ajustes de cuenta', path: '/account-settings?${state.uri.query}')),
-          ),
+          // Por ahora Ajustes de cuenta muestra el plan; empresa e integraciones llegan en la fase 6.
+          GoRoute(path: '/account-settings', pageBuilder: (_, _) => const NoTransitionPage(child: BillingScreen(title: 'Ajustes de cuenta'))),
           for (final entry in pending.entries)
             if (entry.key != '/account-settings')
               GoRoute(

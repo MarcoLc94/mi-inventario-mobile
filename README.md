@@ -65,7 +65,25 @@ según permiso de facturas, Backoffice según permiso).
 | 6 | Administración y Ayuda: usuarios, permisos, almacenes, ajustes de cuenta, tutoriales, Boxy, sugerencias, Backoffice | Pendiente |
 
 Mientras un módulo no está en la app, su pantalla ofrece **Abrir en la web**.
-Elegir plan y pagar la suscripción se hace en la web (Stripe).
+
+## Suscripción con Google Play Billing
+
+En la app el plan se cobra solo con Google Play (la web sigue con Stripe). La
+app no muestra precios ni enlaces de pago externos.
+
+- Productos de suscripción en Play Console (un plan base de renovación
+  automática cada uno): `mi_inventario_mensual` → plan `monthly`,
+  `mi_inventario_anual` → plan `annual`.
+- La app compra con `obfuscatedAccountId` = id de la cuenta y manda el
+  `purchaseToken` a `POST /billing/google_play`; el backend lo verifica con la
+  Google Play Developer API, activa el plan y reconoce la compra.
+- Renovaciones, cancelaciones y vencimientos llegan por notificaciones en
+  tiempo real (Pub/Sub push) a `POST /webhooks/google_play?token=…`.
+- Backend: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (JSON o Base64 de la llave de la
+  cuenta de servicio) y `GOOGLE_PLAY_RTDN_TOKEN` (secreto del webhook).
+- Si la cuenta ya paga con Stripe, la app no deja comprar otra vez.
+- Cambiar entre mensual y anual dentro de la app no está soportado todavía:
+  se cancela en Google Play y se compra el otro plan.
 
 ## Pendiente antes de publicar
 

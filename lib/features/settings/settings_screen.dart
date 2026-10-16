@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../core/config.dart';
 import '../../core/formatters.dart';
 import '../../core/session.dart';
 import '../../core/theme.dart';
@@ -104,11 +103,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.workspace_premium_outlined),
-                title: const Text('Plan y pagos'),
-                subtitle: const Text('Se administra desde la web'),
-                trailing: const Icon(Icons.open_in_new, size: 18),
-                onTap: () => launchUrl(Uri.parse('${AppConfig.webBaseUrl}/account-settings'),
-                    mode: LaunchMode.externalApplication),
+                title: const Text('Plan y suscripción'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/billing'),
               ),
             ]),
           ),

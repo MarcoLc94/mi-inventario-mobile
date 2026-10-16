@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../core/api_client.dart';
 
@@ -35,7 +36,11 @@ class ErrorView extends StatelessWidget {
       icon: icon,
       title: api?.status == 0 ? 'Sin conexión' : 'No se pudo cargar',
       message: api?.message ?? 'Ocurrió un error inesperado.',
-      action: onRetry == null ? null : FilledButton.tonal(onPressed: onRetry, child: const Text('Reintentar')),
+      action: api?.subscriptionInactive == true
+          ? FilledButton(onPressed: () => context.push('/billing'), child: const Text('Ver planes'))
+          : onRetry == null
+              ? null
+              : FilledButton.tonal(onPressed: onRetry, child: const Text('Reintentar')),
     );
   }
 }
