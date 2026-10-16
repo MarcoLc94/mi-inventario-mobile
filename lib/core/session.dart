@@ -152,6 +152,9 @@ class SessionController extends ChangeNotifier implements TokenProvider {
     await _clear();
   }
 
+  /// Cierra la sesión local mostrando un aviso en el login (p. ej. tras eliminar la cuenta).
+  Future<void> endSession({String? notice}) => _clear(notice: notice);
+
   @override
   Future<String?> accessToken({bool forceRefresh = false}) async {
     final expires = _accessExpiresAt;

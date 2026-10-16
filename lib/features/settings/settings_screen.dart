@@ -150,6 +150,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: _confirmLogout,
             ),
           ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.delete_forever_outlined, color: theme.colorScheme.error),
+              title: const Text('Eliminar mi cuenta'),
+              subtitle: const Text('Borra tu usuario o, si eres el único administrador, la empresa.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings/delete-account'),
+            ),
+          ),
           const SizedBox(height: 24),
         ]),
       ),

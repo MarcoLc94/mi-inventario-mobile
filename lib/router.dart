@@ -46,6 +46,7 @@ import 'features/returns/returns_screen.dart';
 import 'features/sale_orders/sale_order_detail_screen.dart';
 import 'features/sale_orders/sale_order_form_screen.dart';
 import 'features/sale_orders/sale_orders_screen.dart';
+import 'features/settings/delete_account_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/stock_history/stock_history_screen.dart';
 import 'features/suppliers/supplier_detail_screen.dart';
@@ -102,6 +103,7 @@ GoRouter buildRouter(SessionController session) {
   // Pantallas de detalle o formulario (se apilan sobre la lista, con botón atrás).
   final details = <String, Widget Function(GoRouterState)>{
     '/products/:id': (state) => ProductDetailScreen(id: state.pathParameters['id']!),
+    '/settings/delete-account': (_) => const DeleteAccountScreen(),
     '/inventory-adjustments/new': (_) => const NewAdjustmentScreen(),
     '/inventory-adjustments/:id': (state) => AdjustmentDetailScreen(id: state.pathParameters['id']!),
     '/transfers/new': (_) => const NewTransferScreen(),
