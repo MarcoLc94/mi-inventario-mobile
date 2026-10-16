@@ -253,10 +253,13 @@ class _Karaoke extends StatelessWidget {
   Widget build(BuildContext context) {
     final mi = context.mi;
     final count = revealed.clamp(0, text.length);
-    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35);
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    // Como en la web: lo dicho se ilumina con el color de enlace del tema.
+    final lit = dark ? mi.accent : mi.primary;
+    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35, fontWeight: FontWeight.w500);
     return Text.rich(TextSpan(style: style, children: [
-      TextSpan(text: text.substring(0, count), style: TextStyle(color: mi.text)),
-      TextSpan(text: text.substring(count), style: TextStyle(color: mi.muted.withValues(alpha: .55))),
+      TextSpan(text: text.substring(0, count), style: TextStyle(color: lit)),
+      TextSpan(text: text.substring(count), style: TextStyle(color: mi.text)),
     ]));
   }
 }

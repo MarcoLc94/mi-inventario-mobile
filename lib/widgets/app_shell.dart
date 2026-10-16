@@ -68,15 +68,29 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       ]);
 }
 
-bool _active(String location, String path) {
+bool _matches(String location, String path) {
   final target = path.split('?').first;
   return target == '/' ? location == '/' : location == target || location.startsWith('$target/');
 }
 
+/// Ruta del menú que corresponde a la pantalla: la coincidencia más larga, para
+/// que /suppliers/orders/5 marque "Órdenes de compra" y no también "Proveedores".
+String? activeMenuPath(String location, UserProfile? user) {
+  String? best;
+  for (final entry in visibleModules(user)) {
+    for (final path in [if (entry.path != null && !entry.locked) entry.path!, for (final item in entry.items ?? const <MenuItem>[]) item.path]) {
+      if (_matches(location, path) && (best == null || path.length > best.length)) best = path;
+    }
+  }
+  if (best == null && _matches(location, '/settings')) best = '/settings';
+  return best;
+}
+
 /// Grupo del menú al que pertenece la pantalla (el "eyebrow" de la barra superior).
 String? menuGroupOf(String location, UserProfile? user) {
+  final active = activeMenuPath(location, user);
   for (final entry in visibleModules(user)) {
-    if (entry.items?.any((item) => _active(location, item.path)) ?? false) return entry.title;
+    if (entry.items?.any((item) => item.path == active) ?? false) return entry.title;
   }
   return null;
 }
@@ -99,6 +113,8 @@ class _AppDrawerState extends State<AppDrawer> {
     final location = GoRouterState.of(context).uri.path;
     final mi = context.mi;
     final modules = visibleModules(user);
+    final activePath = activeMenuPath(location, user);
+    bool isActive(String path) => path == activePath;
     if (!_initialized) {
       _initialized = true;
       _open = menuGroupOf(location, user);
@@ -153,13 +169,13 @@ class _AppDrawerState extends State<AppDrawer> {
               else if (entry.locked)
                 _NavItem(icon: entry.icon!, label: entry.title!, trailing: Icons.lock_outline, onTap: () => locked(entry))
               else if (entry.items == null)
-                _NavItem(icon: entry.icon!, label: entry.title!, active: _active(location, entry.path!), onTap: () => go(entry.path!))
+                _NavItem(icon: entry.icon!, label: entry.title!, active: isActive(entry.path!), onTap: () => go(entry.path!))
               else ...[
                 _NavItem(
                   icon: entry.icon!,
                   label: entry.title!,
                   open: _open == entry.title,
-                  current: entry.items!.any((item) => _active(location, item.path)),
+                  current: entry.items!.any((item) => isActive(item.path)),
                   trailing: Icons.expand_more,
                   onTap: () => setState(() => _open = _open == entry.title ? null : entry.title),
                 ),
@@ -177,7 +193,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           ),
                           child: Column(children: [
                             for (final item in entry.items!)
-                              _NavItem(icon: item.icon, label: item.label, nested: true, active: _active(location, item.path), onTap: () => go(item.path)),
+                              _NavItem(icon: item.icon, label: item.label, nested: true, active: isActive(item.path), onTap: () => go(item.path)),
                           ]),
                         )
                       : const SizedBox(width: double.infinity),
@@ -187,7 +203,7 @@ class _AppDrawerState extends State<AppDrawer> {
               margin: const EdgeInsets.fromLTRB(8, 12, 8, 6),
               decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x14FFFFFF)))),
             ),
-            _NavItem(icon: Icons.manage_accounts_outlined, label: 'Mi perfil y ajustes', active: _active(location, '/settings'), onTap: () => go('/settings')),
+            _NavItem(icon: Icons.manage_accounts_outlined, label: 'Mi perfil y ajustes', active: isActive('/settings'), onTap: () => go('/settings')),
           ]),
         ),
       ),
@@ -216,20 +232,28 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final mi = context.mi;
     final bright = active || open || current;
+    // Submódulo abierto: fondo de selección y barra. Módulo que lo contiene:
+    // fondo teñido más suave y la misma barra, aunque esté plegado.
+    final background = active
+        ? mi.navSelected
+        : current
+            ? mi.navHighlight.withValues(alpha: .1)
+            : (open ? const Color(0x07FFFFFF) : Colors.transparent);
+    final marked = active || current;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Material(
-        color: active ? mi.navSelected : (open ? const Color(0x07FFFFFF) : Colors.transparent),
+        color: background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: active ? const Color(0x12FFFFFF) : Colors.transparent),
+          side: BorderSide(color: marked ? const Color(0x18FFFFFF) : Colors.transparent),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Container(
             constraints: BoxConstraints(minHeight: nested ? 44 : 48),
-            decoration: BoxDecoration(border: Border(left: BorderSide(color: active ? mi.navHighlight : Colors.transparent, width: 3))),
+            decoration: BoxDecoration(border: Border(left: BorderSide(color: marked ? mi.navHighlight : Colors.transparent, width: 3))),
             padding: const EdgeInsets.fromLTRB(9, 0, 12, 0),
             child: Row(children: [
               Icon(icon, size: nested ? 20 : 21, color: active || current ? mi.navHighlight : (bright ? Colors.white : const Color(0xFFC6CDE0))),

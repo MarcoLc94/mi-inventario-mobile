@@ -39,9 +39,7 @@ class BoxyGuide extends ChangeNotifier {
   AudioPlayer? _playerInstance;
 
   /// El reproductor se crea la primera vez que Boxy habla.
-  AudioPlayer get _player => _playerInstance ??= AudioPlayer()
-    ..onPositionChanged.listen(_onPosition)
-    ..onPlayerComplete.listen((_) => _finishSpeech());
+  AudioPlayer get _player => _playerInstance ??= AudioPlayer()..onPlayerComplete.listen((_) => _finishSpeech());
   SharedPreferences? _prefs;
   int? _userId;
 
@@ -65,7 +63,9 @@ class BoxyGuide extends ChangeNotifier {
   bool speaking = false;
   String _spoken = '';
   List<({int end, Duration start})> _marks = const [];
+  List<int> _letterTimes = const [];
   Timer? _typing;
+  Timer? _karaoke;
   int _attempt = 0;
 
   UserProfile? get user => session.profile;
@@ -290,6 +290,7 @@ class BoxyGuide extends ChangeNotifier {
       voice = BoxyVoice.playing;
       speaking = true;
       notifyListeners();
+      await _followAudio(text, attempt);
     } catch (_) {
       if (attempt != _attempt) return;
       // Sin voz: Boxy sigue escribiendo el texto letra por letra.
@@ -311,21 +312,67 @@ class BoxyGuide extends ChangeNotifier {
     });
   }
 
-  void _onPosition(Duration position) {
-    if (voice != BoxyVoice.playing) return;
-    var count = 0;
-    for (final mark in _marks) {
-      if (mark.start <= position) count = mark.end;
+  /// Ilumina las letras al ritmo del audio: con marcas por palabra si el
+  /// proveedor las da; si no, con tiempos estimados por letra ajustados a la
+  /// duración real (letterTimings + scaleTimings de la web).
+  Future<void> _followAudio(String text, int attempt) async {
+    Duration? duration;
+    for (var i = 0; i < 20 && duration == null && attempt == _attempt; i++) {
+      duration = await _player.getDuration();
+      if (duration == null) await Future<void>.delayed(const Duration(milliseconds: 50));
     }
-    if (_marks.isEmpty) count = _spoken.length;
-    if (count != revealed) {
-      revealed = count;
-      notifyListeners();
+    if (attempt != _attempt) return;
+    _letterTimes = _scaledLetterTimes(text, duration);
+    _karaoke?.cancel();
+    _karaoke = Timer.periodic(const Duration(milliseconds: 40), (timer) async {
+      if (attempt != _attempt || voice != BoxyVoice.playing) {
+        timer.cancel();
+        return;
+      }
+      final position = await _player.getCurrentPosition();
+      if (position == null || attempt != _attempt) return;
+      final count = _countAt(position);
+      if (count != revealed) {
+        revealed = count;
+        notifyListeners();
+      }
+    });
+  }
+
+  int _countAt(Duration position) {
+    if (_marks.isNotEmpty) {
+      var count = 0;
+      for (final mark in _marks) {
+        if (mark.start <= position) count = mark.end;
+      }
+      return count;
     }
+    final ms = position.inMilliseconds;
+    final next = _letterTimes.indexWhere((time) => time > ms);
+    return next == -1 ? _letterTimes.length : next;
+  }
+
+  static List<int> _scaledLetterTimes(String text, Duration? duration) {
+    var elapsed = 0;
+    final times = [
+      for (final letter in text.split(''))
+        elapsed += RegExp(r'[.!?…]').hasMatch(letter)
+            ? 240
+            : RegExp(r'[,;:]').hasMatch(letter)
+                ? 140
+                : letter.trim().isEmpty
+                    ? 35
+                    : 55,
+    ];
+    final total = duration?.inMilliseconds ?? 0;
+    if (times.isEmpty || total <= 0) return times;
+    final scale = total / times.last;
+    return [for (final time in times) (time * scale).round()];
   }
 
   void _finishSpeech() {
     _typing?.cancel();
+    _karaoke?.cancel();
     speaking = false;
     revealed = _spoken.length;
     notifyListeners();
@@ -334,6 +381,7 @@ class BoxyGuide extends ChangeNotifier {
   void _stopSpeech({bool keepText = false}) {
     _attempt++;
     _typing?.cancel();
+    _karaoke?.cancel();
     unawaited(_playerInstance?.stop());
     speaking = false;
     if (!keepText) _spoken = '';
@@ -360,6 +408,7 @@ class BoxyGuide extends ChangeNotifier {
   void dispose() {
     session.removeListener(_sessionChanged);
     _typing?.cancel();
+    _karaoke?.cancel();
     _playerInstance?.dispose();
     super.dispose();
   }
