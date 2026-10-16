@@ -143,7 +143,16 @@ class SessionController extends ChangeNotifier implements TokenProvider {
     notifyListeners();
   }
 
+  /// Tareas a correr con la sesión todavía abierta antes de cerrarla
+  /// (p. ej. dar de baja el teléfono para no recibir push de otra cuenta).
+  final beforeLogout = <Future<void> Function()>[];
+
   Future<void> logout() async {
+    for (final task in beforeLogout) {
+      try {
+        await task().timeout(const Duration(seconds: 5));
+      } catch (_) {}
+    }
     try {
       if (_accessToken != null) await api.delete('/api/mobile/v1/session');
     } catch (_) {

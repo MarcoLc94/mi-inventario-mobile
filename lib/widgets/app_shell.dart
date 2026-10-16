@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../core/boxy_guide.dart';
 import '../core/modules.dart';
+import '../core/push.dart';
 import '../core/session.dart';
 import '../core/theme.dart';
 import '../core/user_profile.dart';
@@ -58,6 +59,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       if (paused != null && DateTime.now().difference(paused) > AppShell.lockAfter) {
         context.read<SessionController>().lock();
       }
+      context.read<PushService>().refresh();
     }
   }
 
@@ -296,6 +298,25 @@ const _roleLabels = {
 
 String roleLabel(String role) => _roleLabels[role] ?? role;
 
+/// Campana de avisos con el número de no leídos (como la de la web).
+class NotificationBell extends StatelessWidget {
+  const NotificationBell({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final unread = context.watch<PushService>().unread;
+    return IconButton(
+      tooltip: 'Avisos',
+      onPressed: () => context.push('/notifications'),
+      icon: Badge(
+        isLabelVisible: unread > 0,
+        label: Text(unread > 99 ? '99+' : '$unread'),
+        child: const Icon(Icons.notifications_none),
+      ),
+    );
+  }
+}
+
 /// Botón de Boxy de la barra superior: abre su ayuda.
 class BoxyButton extends StatelessWidget {
   const BoxyButton({super.key});
@@ -396,7 +417,7 @@ class ModuleScaffold extends StatelessWidget {
           if (group != null) Text(group.toUpperCase(), style: eyebrow(context, color: context.mi.primary)),
           Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
         ]),
-        actions: [...?actions, const BoxyButton(), const ProfileMenu()],
+        actions: [...?actions, const NotificationBell(), const BoxyButton(), const ProfileMenu()],
         bottom: bottom,
       ),
       drawer: const AppDrawer(),

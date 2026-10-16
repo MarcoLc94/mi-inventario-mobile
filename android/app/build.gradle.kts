@@ -7,6 +7,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Firebase (notificaciones push) es opcional: se activa al colocar
+// android/app/google-services.json. Sin él la app compila igual, sin push.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 // Firma de release: android/key.properties (no está en git) apunta a la llave
 // de subida de Play. Sin ese archivo, release se firma con la llave de debug.
 val keystoreProperties = Properties()
@@ -23,6 +29,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // flutter_local_notifications usa APIs de java.time.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -65,4 +73,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
