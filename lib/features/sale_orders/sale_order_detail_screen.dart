@@ -5,11 +5,13 @@ import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
 import '../../core/files.dart';
 import '../../core/formatters.dart';
+import '../../core/session.dart';
 import '../../core/user_profile.dart';
 import '../../widgets/async_states.dart';
 import '../../widgets/form_fields.dart';
 import '../../widgets/order_lines.dart';
 import '../../widgets/status.dart';
+import '../cfdis/cfdi_catalogs.dart';
 import 'sale_order_form_screen.dart';
 
 class SaleOrderDetailScreen extends StatefulWidget {
@@ -50,6 +52,20 @@ class _SaleOrderDetailScreenState extends State<SaleOrderDetailScreen> {
   Future<void> _edit(Map<String, dynamic> order) async {
     final saved = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => SaleOrderFormScreen(order: order)));
     if (saved == true) _reload();
+  }
+
+  Future<void> _invoice(Map<String, dynamic> order) async {
+    final invoice = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => _CreateInvoiceSheet(order: order),
+    );
+    if (invoice != null && mounted) {
+      _changed = true;
+      await context.push('/cfdis/facturas/${invoice['id']}');
+      if (mounted) setState(() => _future = _load());
+    }
   }
 
   Future<void> _pdf(Map<String, dynamic> order, String path, String name) async {
@@ -122,6 +138,17 @@ class _SaleOrderDetailScreenState extends State<SaleOrderDetailScreen> {
                       label: const Text('Marcar como enviada'),
                     ),
                   ),
+                if ((status == 'shipped' || status == 'completed') && (context.read<SessionController>().profile?.canReadSaleInvoices ?? false))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: o['sale_invoice'] != null && asMap(o['sale_invoice'])['status'] != 'cancelled'
+                        ? FilledButton.tonalIcon(
+                            onPressed: () => context.push('/cfdis/facturas/${asMap(o['sale_invoice'])['id']}'),
+                            icon: const Icon(Icons.description_outlined),
+                            label: Text('Ver factura ${cfdiFolio(asMap(o['sale_invoice']))}'),
+                          )
+                        : FilledButton.icon(onPressed: () => _invoice(o), icon: const Icon(Icons.description_outlined), label: const Text('Facturar')),
+                  ),
                 if (status == 'draft')
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -164,4 +191,83 @@ class _SaleOrderDetailScreenState extends State<SaleOrderDetailScreen> {
       ),
     );
   }
+}
+
+/// Datos de la factura (CFDI) de una orden de venta enviada.
+class _CreateInvoiceSheet extends StatefulWidget {
+  const _CreateInvoiceSheet({required this.order});
+  final Map<String, dynamic> order;
+
+  @override
+  State<_CreateInvoiceSheet> createState() => _CreateInvoiceSheetState();
+}
+
+class _CreateInvoiceSheetState extends State<_CreateInvoiceSheet> {
+  String _method = 'PUE';
+  String _form = '03';
+  late String _use = cfdiUses.containsKey(asMap(widget.order['client'])['cfdi_use']) ? asMap(widget.order['client'])['cfdi_use'].toString() : 'G03';
+  bool _busy = false;
+  String? _error;
+
+  Future<void> _create() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final invoice = asMap(await context.read<ApiClient>().post('/sale_orders/${widget.order['id']}/sale_invoices', {
+        'sale_invoice': {'payment_method': _method, 'payment_form': _method == 'PPD' ? '99' : _form, 'cfdi_use': _use},
+      }));
+      if (mounted) Navigator.pop(context, invoice);
+    } catch (error) {
+      if (mounted) setState(() => _error = error.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 16),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text('Datos de la factura', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          if (_error != null) Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          DropdownButtonFormField<String>(
+            initialValue: _method,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Método de pago'),
+            items: [for (final e in paymentMethods.entries) DropdownMenuItem(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis))],
+            onChanged: (v) => setState(() => _method = v ?? 'PUE'),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            initialValue: _method == 'PPD' ? '99' : _form,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Forma de pago'),
+            items: [
+              for (final e in invoicePaymentForms.entries)
+                if (_method == 'PPD' || e.key != '99') DropdownMenuItem(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis)),
+            ],
+            onChanged: _method == 'PPD' ? null : (v) => setState(() => _form = v ?? '03'),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            initialValue: _use,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Uso de CFDI'),
+            items: [for (final e in cfdiUses.entries) DropdownMenuItem(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis))],
+            onChanged: (v) => setState(() => _use = v ?? 'G03'),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _method == 'PPD'
+                ? 'PPD: el cliente pagará después o en parcialidades. La forma de pago queda en 99 y cada pago se registra con un complemento de pago.'
+                : 'PUE: el cliente ya pagó completo. Indica cómo pagó.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 16),
+          FilledButton(onPressed: _busy ? null : _create, child: Text(_busy ? 'Creando…' : 'Crear factura')),
+        ]),
+      );
 }

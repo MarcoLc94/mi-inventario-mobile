@@ -10,6 +10,13 @@ import 'features/auth/lock_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/splash_screen.dart';
 import 'features/categories/categories_screen.dart';
+import 'features/cfdis/cfdi_catalogs.dart';
+import 'features/cfdis/cfdi_document_detail_screen.dart';
+import 'features/cfdis/cfdi_documents_screen.dart';
+import 'features/cfdis/fiscal_settings_screen.dart';
+import 'features/cfdis/global_invoice_new_screen.dart';
+import 'features/cfdis/sale_invoice_detail_screen.dart';
+import 'features/cfdis/sale_invoices_screen.dart';
 import 'features/clients/client_detail_screen.dart';
 import 'features/clients/clients_screen.dart';
 import 'features/home/home_screen.dart';
@@ -64,6 +71,11 @@ GoRouter buildRouter(SessionController session) {
     '/pos': (_) => const PosScreen(),
     '/pos/tickets': (_) => const PosTicketsScreen(),
     '/pos/cortes': (_) => const PosSessionsScreen(),
+    '/cfdis/facturas': (_) => const SaleInvoicesScreen(),
+    '/cfdis/complementos-pago': (_) => const CfdiDocumentsScreen(kind: CfdiKind.payment),
+    '/cfdis/notas-credito': (_) => const CfdiDocumentsScreen(kind: CfdiKind.creditNote),
+    '/cfdis/factura-global': (_) => const CfdiDocumentsScreen(kind: CfdiKind.globalInvoice),
+    '/cfdis/configuracion': (_) => const FiscalSettingsScreen(),
   };
 
   // Pantallas de detalle o formulario (se apilan sobre la lista, con botón atrás).
@@ -85,6 +97,11 @@ GoRouter buildRouter(SessionController session) {
     '/clients/returns/new': (_) => const NewReturnScreen(kind: ReturnKind.client),
     '/clients/returns/:id': (state) => ReturnDetailScreen(kind: ReturnKind.client, id: state.pathParameters['id']!),
     '/clients/:id': (state) => ClientDetailScreen(id: state.pathParameters['id']!),
+    '/cfdis/facturas/:id': (state) => SaleInvoiceDetailScreen(id: state.pathParameters['id']!),
+    '/cfdis/complementos-pago/:id': (state) => CfdiDocumentDetailScreen(kind: CfdiKind.payment, id: state.pathParameters['id']!),
+    '/cfdis/notas-credito/:id': (state) => CfdiDocumentDetailScreen(kind: CfdiKind.creditNote, id: state.pathParameters['id']!),
+    '/cfdis/factura-global/nueva': (_) => const GlobalInvoiceNewScreen(),
+    '/cfdis/factura-global/:id': (state) => CfdiDocumentDetailScreen(kind: CfdiKind.globalInvoice, id: state.pathParameters['id']!),
   };
 
   // Todo lo demás del menú: pantalla "llega pronto" con enlace a la web.

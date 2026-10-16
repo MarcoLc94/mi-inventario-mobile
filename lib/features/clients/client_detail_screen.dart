@@ -9,6 +9,7 @@ import '../../core/user_profile.dart';
 import '../../widgets/async_states.dart';
 import '../../widgets/form_fields.dart';
 import '../../widgets/status.dart';
+import '../cfdis/cfdi_catalogs.dart';
 import 'client_form_screen.dart';
 
 class ClientDetailScreen extends StatefulWidget {
@@ -93,8 +94,9 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
                         SectionCard(title: 'Datos fiscales y crédito', children: [
                           InfoRow('Razón social', c['legal_name']?.toString()),
                           InfoRow('RFC', c['tax_id']?.toString()),
-                          InfoRow('Régimen fiscal', c['tax_regime']?.toString()),
-                          InfoRow('Uso de CFDI', c['cfdi_use']?.toString()),
+                          InfoRow('Régimen fiscal', fiscalRegimes[c['fiscal_regime']] ?? c['fiscal_regime']?.toString()),
+                          InfoRow('Uso de CFDI', cfdiUses[c['cfdi_use']] ?? c['cfdi_use']?.toString()),
+                          InfoRow('C.P. fiscal', c['tax_zip_code']?.toString()),
                           InfoRow('Límite de crédito', formatMoney(c['credit_limit'])),
                           InfoRow('Crédito disponible', c['available_credit'] == null ? null : formatMoney(c['available_credit'])),
                           InfoRow('Notas', c['notes']?.toString()),

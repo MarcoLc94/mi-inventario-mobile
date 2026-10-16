@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/api_client.dart';
 import '../../core/user_profile.dart';
+import '../cfdis/cfdi_catalogs.dart';
 
 /// Alta y edición de clientes (mismos campos que la web).
 class ClientFormScreen extends StatefulWidget {
@@ -16,12 +17,14 @@ class ClientFormScreen extends StatefulWidget {
 class _ClientFormScreenState extends State<ClientFormScreen> {
   late final Map<String, dynamic> _c = widget.client ?? const {};
   late final _f = {
-    for (final key in ['name', 'email', 'phone', 'legal_name', 'tax_id', 'address', 'city', 'state', 'postal_code', 'notes'])
+    for (final key in ['name', 'email', 'phone', 'legal_name', 'tax_id', 'address', 'city', 'state', 'postal_code', 'tax_zip_code', 'notes'])
       key: TextEditingController(text: _c[key]?.toString() ?? ''),
     'country': TextEditingController(text: _c['country']?.toString() ?? 'México'),
     'credit_limit': TextEditingController(text: _c['credit_limit']?.toString() ?? '0'),
   };
   late String _status = _c['status']?.toString() ?? 'active';
+  late String? _regime = fiscalRegimes.containsKey(_c['fiscal_regime']) ? _c['fiscal_regime'].toString() : null;
+  late String _cfdiUse = cfdiUses.containsKey(_c['cfdi_use']) ? _c['cfdi_use'].toString() : 'G03';
   bool _saving = false;
   String? _error;
 
@@ -51,7 +54,9 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
       _error = null;
     });
     final payload = {
-      for (final key in ['name', 'phone', 'legal_name', 'address', 'city', 'state', 'postal_code', 'country', 'notes']) key: _t(key),
+      for (final key in ['name', 'phone', 'legal_name', 'address', 'city', 'state', 'postal_code', 'tax_zip_code', 'country', 'notes']) key: _t(key),
+      'fiscal_regime': _regime ?? '',
+      'cfdi_use': _cfdiUse,
       'email': _t('email').toLowerCase(),
       'tax_id': _t('tax_id').replaceAll(RegExp(r'\s'), '').toUpperCase(),
       'credit_limit': num.tryParse(_t('credit_limit')) ?? 0,
@@ -88,6 +93,23 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
         const SizedBox(height: 8),
         _field('legal_name', 'Razón social', hint: 'Nombre fiscal del cliente'),
         _field('tax_id', 'RFC'),
+        DropdownButtonFormField<String>(
+          initialValue: _regime,
+          isExpanded: true,
+          decoration: const InputDecoration(labelText: 'Régimen fiscal'),
+          items: [for (final e in fiscalRegimes.entries) DropdownMenuItem(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis))],
+          onChanged: (v) => setState(() => _regime = v),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          initialValue: _cfdiUse,
+          isExpanded: true,
+          decoration: const InputDecoration(labelText: 'Uso de CFDI'),
+          items: [for (final e in cfdiUses.entries) DropdownMenuItem(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis))],
+          onChanged: (v) => setState(() => _cfdiUse = v ?? 'G03'),
+        ),
+        const SizedBox(height: 12),
+        _field('tax_zip_code', 'Código postal fiscal', keyboard: TextInputType.number),
         _field('postal_code', 'Código postal', keyboard: TextInputType.number),
         Text('Dirección', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
