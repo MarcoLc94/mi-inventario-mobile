@@ -59,7 +59,7 @@ según permiso de facturas, Backoffice según permiso).
 |------|---------|--------|
 | 1 | Login, biometría, tema, menú con permisos, Inicio, Productos (catálogo y detalle), Mi perfil | ✅ |
 | 2 | Inventario: alta/edición/borrado de productos con fotos y presentaciones, categorías, ajustes (aprobar/rechazar, PDF), transferencias, lotes y caducidades, movimientos, entradas/salidas manuales con comprobante PDF, escáner de código de barras | ✅ |
-| 3 | Compras y Ventas: proveedores (también el catálogo de Inventario sin Facturación), órdenes de compra, devoluciones, clientes, órdenes de salida, devoluciones de clientes | Pendiente |
+| 3 | Compras y Ventas: proveedores, órdenes de compra (alta, edición, aprobación, recepción parcial o total con lotes, PDF), devoluciones a proveedor, clientes, órdenes de venta (aprobar, enviar, cancelar, PDF y remisión), devoluciones de clientes | ✅ |
 | 4 | Punto de venta: cobrar, tickets, cortes | Pendiente |
 | 5 | CFDIs: facturas, complementos de pago, factura global, notas de crédito, configuración fiscal | Pendiente |
 | 6 | Administración y Ayuda: usuarios, permisos, almacenes, ajustes de cuenta, tutoriales, Boxy, sugerencias, Backoffice | Pendiente |

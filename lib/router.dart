@@ -10,6 +10,8 @@ import 'features/auth/lock_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/splash_screen.dart';
 import 'features/categories/categories_screen.dart';
+import 'features/clients/client_detail_screen.dart';
+import 'features/clients/clients_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/lots/lot_detail_screen.dart';
 import 'features/lots/lots_screen.dart';
@@ -18,8 +20,20 @@ import 'features/manual_inventory/receipts_screen.dart';
 import 'features/placeholder/module_placeholder.dart';
 import 'features/products/product_detail_screen.dart';
 import 'features/products/products_screen.dart';
+import 'features/purchases/purchase_order_detail_screen.dart';
+import 'features/purchases/purchase_order_form_screen.dart';
+import 'features/purchases/purchase_orders_screen.dart';
+import 'features/returns/new_return_screen.dart';
+import 'features/returns/return_detail_screen.dart';
+import 'features/returns/return_kind.dart';
+import 'features/returns/returns_screen.dart';
+import 'features/sale_orders/sale_order_detail_screen.dart';
+import 'features/sale_orders/sale_order_form_screen.dart';
+import 'features/sale_orders/sale_orders_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/stock_history/stock_history_screen.dart';
+import 'features/suppliers/supplier_detail_screen.dart';
+import 'features/suppliers/suppliers_screen.dart';
 import 'features/transfers/new_transfer_screen.dart';
 import 'features/transfers/transfer_detail_screen.dart';
 import 'features/transfers/transfers_screen.dart';
@@ -38,6 +52,12 @@ GoRouter buildRouter(SessionController session) {
     '/inventory/lots': (_) => const LotsScreen(),
     '/stock-history': (_) => const StockHistoryScreen(),
     '/inventory/receipts': (_) => const ReceiptsScreen(),
+    '/suppliers': (_) => const SuppliersScreen(),
+    '/suppliers/orders': (_) => const PurchaseOrdersScreen(),
+    '/suppliers/returns': (_) => const ReturnsScreen(kind: ReturnKind.supplier),
+    '/clients': (_) => const ClientsScreen(),
+    '/clients/orders': (_) => const SaleOrdersScreen(),
+    '/clients/returns': (_) => const ReturnsScreen(kind: ReturnKind.client),
   };
 
   // Pantallas de detalle o formulario (se apilan sobre la lista, con botón atrás).
@@ -49,6 +69,16 @@ GoRouter buildRouter(SessionController session) {
     '/transfers/:id': (state) => TransferDetailScreen(id: state.pathParameters['id']!),
     '/inventory/lots/:id': (state) => LotDetailScreen(id: state.pathParameters['id']!),
     '/inventory/manual': (state) => ManualInventoryScreen(direction: state.uri.queryParameters['type'] == 'OUT' ? 'OUT' : 'IN'),
+    '/suppliers/detail/:id': (state) => SupplierDetailScreen(id: state.pathParameters['id']!),
+    '/suppliers/orders/create': (_) => const PurchaseOrderFormScreen(),
+    '/suppliers/orders/:id': (state) => PurchaseOrderDetailScreen(id: state.pathParameters['id']!),
+    '/suppliers/returns/new': (_) => const NewReturnScreen(kind: ReturnKind.supplier),
+    '/suppliers/returns/:id': (state) => ReturnDetailScreen(kind: ReturnKind.supplier, id: state.pathParameters['id']!),
+    '/clients/orders/create': (_) => const SaleOrderFormScreen(),
+    '/clients/orders/:id': (state) => SaleOrderDetailScreen(id: state.pathParameters['id']!),
+    '/clients/returns/new': (_) => const NewReturnScreen(kind: ReturnKind.client),
+    '/clients/returns/:id': (state) => ReturnDetailScreen(kind: ReturnKind.client, id: state.pathParameters['id']!),
+    '/clients/:id': (state) => ClientDetailScreen(id: state.pathParameters['id']!),
   };
 
   // Todo lo demás del menú: pantalla "llega pronto" con enlace a la web.
