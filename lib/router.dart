@@ -3,12 +3,14 @@ import 'package:go_router/go_router.dart';
 
 import 'core/modules.dart';
 import 'core/session.dart';
+import 'features/account/account_settings_screen.dart';
 import 'features/adjustments/adjustment_detail_screen.dart';
 import 'features/adjustments/adjustments_screen.dart';
 import 'features/adjustments/new_adjustment_screen.dart';
 import 'features/auth/lock_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/splash_screen.dart';
+import 'features/backoffice/backoffice_screen.dart';
 import 'features/billing/billing_screen.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/cfdis/cfdi_catalogs.dart';
@@ -20,6 +22,9 @@ import 'features/cfdis/sale_invoice_detail_screen.dart';
 import 'features/cfdis/sale_invoices_screen.dart';
 import 'features/clients/client_detail_screen.dart';
 import 'features/clients/clients_screen.dart';
+import 'features/help/boxy_screen.dart';
+import 'features/help/suggestions_screen.dart';
+import 'features/help/tutorials_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/lots/lot_detail_screen.dart';
 import 'features/lots/lots_screen.dart';
@@ -45,9 +50,14 @@ import 'features/settings/settings_screen.dart';
 import 'features/stock_history/stock_history_screen.dart';
 import 'features/suppliers/supplier_detail_screen.dart';
 import 'features/suppliers/suppliers_screen.dart';
+import 'features/permissions/permissions_screen.dart';
 import 'features/transfers/new_transfer_screen.dart';
 import 'features/transfers/transfer_detail_screen.dart';
 import 'features/transfers/transfers_screen.dart';
+import 'features/users/user_detail_screen.dart';
+import 'features/users/users_screen.dart';
+import 'features/warehouses/warehouse_detail_screen.dart';
+import 'features/warehouses/warehouses_screen.dart';
 import 'widgets/app_shell.dart';
 
 /// Rutas con las mismas direcciones que la web, para que el menú y los
@@ -78,6 +88,15 @@ GoRouter buildRouter(SessionController session) {
     '/cfdis/notas-credito': (_) => const CfdiDocumentsScreen(kind: CfdiKind.creditNote),
     '/cfdis/factura-global': (_) => const CfdiDocumentsScreen(kind: CfdiKind.globalInvoice),
     '/cfdis/configuracion': (_) => const FiscalSettingsScreen(),
+    '/users': (_) => const UsersScreen(),
+    '/permissions': (_) => const PermissionsScreen(),
+    '/warehouses': (_) => const WarehousesScreen(),
+    '/account-settings': (_) => const AccountSettingsScreen(),
+    '/help/tutorials': (_) => const TutorialsScreen(),
+    '/help/boxy': (_) => const BoxyScreen(),
+    '/help/suggestions': (_) => const SuggestionsScreen(),
+    '/platform-admin': (_) => const BackofficeScreen(),
+    '/platform-admin/suggestions': (_) => const SuggestionsScreen(backoffice: true),
   };
 
   // Pantallas de detalle o formulario (se apilan sobre la lista, con botón atrás).
@@ -104,6 +123,10 @@ GoRouter buildRouter(SessionController session) {
     '/cfdis/notas-credito/:id': (state) => CfdiDocumentDetailScreen(kind: CfdiKind.creditNote, id: state.pathParameters['id']!),
     '/cfdis/factura-global/nueva': (_) => const GlobalInvoiceNewScreen(),
     '/cfdis/factura-global/:id': (state) => CfdiDocumentDetailScreen(kind: CfdiKind.globalInvoice, id: state.pathParameters['id']!),
+    '/user-detail/:id': (state) => UserDetailScreen(id: state.pathParameters['id']!),
+    '/warehouses/:id': (state) => WarehouseDetailScreen(id: state.pathParameters['id']!),
+    '/help/suggestions/:id': (state) => SuggestionDetailScreen(id: state.pathParameters['id']!),
+    '/platform-admin/suggestions/:id': (state) => SuggestionDetailScreen(id: state.pathParameters['id']!, backoffice: true),
   };
 
   // Todo lo demás del menú: pantalla "llega pronto" con enlace a la web.
@@ -139,11 +162,8 @@ GoRouter buildRouter(SessionController session) {
           for (final entry in implemented.entries)
             GoRoute(path: entry.key, pageBuilder: (_, state) => NoTransitionPage(child: entry.value(state))),
           for (final entry in details.entries) GoRoute(path: entry.key, builder: (_, state) => entry.value(state)),
-          // Por ahora Ajustes de cuenta muestra el plan; empresa e integraciones llegan en la fase 6.
-          GoRoute(path: '/account-settings', pageBuilder: (_, _) => const NoTransitionPage(child: BillingScreen(title: 'Ajustes de cuenta'))),
           for (final entry in pending.entries)
-            if (entry.key != '/account-settings')
-              GoRoute(
+            GoRoute(
                 path: entry.key,
                 pageBuilder: (_, _) => NoTransitionPage(child: ModulePlaceholder(title: entry.value, path: entry.key)),
               ),

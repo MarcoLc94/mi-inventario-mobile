@@ -62,9 +62,9 @@ según permiso de facturas, Backoffice según permiso).
 | 3 | Compras y Ventas: proveedores, órdenes de compra (alta, edición, aprobación, recepción parcial o total con lotes, PDF), devoluciones a proveedor, clientes, órdenes de venta (aprobar, enviar, cancelar, PDF y remisión), devoluciones de clientes | ✅ |
 | 4 | Punto de venta: abrir caja, catálogo con escáner (también códigos de presentaciones), venta con total calculado por el servidor, cobro en efectivo/tarjeta/transferencia sin cobros duplicados, ticket PDF, cierre de caja, tickets y cortes | ✅ |
 | 5 | CFDIs: facturar ventas enviadas, timbrar, cancelar, PDF/XML, envío por correo, complementos de pago, notas de crédito, factura global, configuración fiscal con carga de CSD | ✅ |
-| 6 | Administración y Ayuda: usuarios, permisos, almacenes, ajustes de cuenta, tutoriales, Boxy, sugerencias, Backoffice | Pendiente |
+| 6 | Administración y Ayuda: usuarios (alta, edición, foto, contraseña), permisos por módulo, almacenes y ubicaciones, ajustes de cuenta con logo, tutoriales de Boxy, chat con Boxy, sugerencias y Backoffice | ✅ |
 
-Mientras un módulo no está en la app, su pantalla ofrece **Abrir en la web**.
+Todos los módulos del menú de la web ya están en la app. El permiso de Backoffice de un usuario y la contratación de módulos adicionales siguen en la web.
 
 ## Suscripción con Google Play Billing
 
